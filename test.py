@@ -46,5 +46,5 @@ for path in glob.glob(test_img_folder):
 bar = tqdm(total=nuber)
 for path in glob.glob(test_img_folder):
     base = osp.splitext(osp.basename(path))[0]
-    threading.Thread(target=upscale,args=(path,base))
+    threading.Thread(target=upscale,args=(path,base)).start()
     time.sleep(0.1)
