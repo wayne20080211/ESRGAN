@@ -1,4 +1,8 @@
 import os.path as osp
+import os
+import threading
+import time
+from tqdm import tqdm
 import glob
 import cv2
 import numpy as np
@@ -18,11 +22,7 @@ model = model.to(device)
 
 print('Model path {:s}. \nTesting...'.format(model_path))
 
-idx = 0
-for path in glob.glob(test_img_folder):
-    idx += 1
-    base = osp.splitext(osp.basename(path))[0]
-    print(idx, base)
+def upscale(path,base):
     # read images
     img = cv2.imread(path, cv2.IMREAD_COLOR)
     img = img * 1.0 / 255
@@ -35,3 +35,16 @@ for path in glob.glob(test_img_folder):
     output = np.transpose(output[[2, 1, 0], :, :], (1, 2, 0))
     output = (output * 255.0).round()
     cv2.imwrite('results/{:s}_rlt.png'.format(base), output)
+    os.remove(path)
+    bar.update(1)
+
+nuber = 0
+for path in glob.glob(test_img_folder):
+    nuber += 1
+
+
+bar = tqdm(total=nuber)
+for path in glob.glob(test_img_folder):
+    base = osp.splitext(osp.basename(path))[0]
+    threading.Thread(target=upscale,args=(path,base))
+    time.sleep(0.1)
